@@ -1,124 +1,355 @@
-/*
- * TODO
- * - make it an actual node
- * - make it react on touch and collision
- * - improve the math
- * - create meaningful interface for good usability
- * 
- */
 package shatter;
 
+import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;
 import javafx.animation.ParallelTransition;
-import javafx.animation.ParallelTransitionBuilder;
 import javafx.animation.RotateTransition;
-import javafx.animation.RotateTransitionBuilder;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
-import javafx.animation.TranslateTransitionBuilder;
-import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.ArcBuilder;
+import javafx.scene.shape.Arc;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.Circle;
-import javafx.stage.Stage;
+import javafx.scene.shape.Ellipse;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 /**
  *
- * @author jiri
+ * @author George
  */
-public class Shatter extends Application {
+public class Shatter extends Parent {
 
-    // STRENGTH determines how many pieces'll shatter produce
-    public final int STRENGTH = 3;
-    private final int arcLength = 360 / STRENGTH;
+  private Duration duration = Duration.seconds(3);
+  private double strength = 8;
+  private final double arcLength = 360 / getStrength();
+  private final ParallelTransition par = new ParallelTransition();
+  private final Group pieces = new Group();
+  private boolean rotateRandom = true;
+  private Circle circle;
+  private Ellipse ellipse;
+  private Rectangle rectangle;
+  private Text text;
+  private ImageView imageView;
+
+  /**
+   * Creates Shatter node with default behavior
+   *
+   * @param node the node representing this shatter
+   */
+  public Shatter(Node node) {
     
+    if (node != null) {
+      if (node.getClass().getName().equalsIgnoreCase("javafx.scene.shape.Circle")) {
+        shatterCircle(node);
+      } else if (node.getClass().getName().equalsIgnoreCase("javafx.scene.shape.Ellipse")) {
+        shatterEllipse(node);
+      } else if (node.getClass().getName().equalsIgnoreCase("javafx.scene.image.ImageView")) {
+        shatterImageView(node);
+      } else if (node.getClass().getName().equalsIgnoreCase("javafx.scene.shape.Rectangle")) {
+        shatterRectangle(node);
+      } else if (node.getClass().getName().equalsIgnoreCase("javafx.scene.text.Text")) {
+        shatterText(node);
+      }
+    }
+  }
+
     /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        launch(args);
+   * @return the duration
+   */
+  public Duration getDuration() {
+    return duration;
+  }
+
+  /**
+   * @param duration the duration to set
+   */
+  public void setDuration(Duration duration) {
+    this.duration = duration;
+  }
+
+  /**
+   * @return the strength that determines how many pieces will the shatter
+   * produce.
+   */
+  public double getStrength() {
+    return strength;
+  }
+
+  /**
+   * @param strength set the strength that determines how many pieces will the
+   * shatter produce.
+   */
+  public void setStrength(double strength) {
+    this.strength = strength;
+  }
+
+  /**
+   * @return the rotateRandom
+   */
+  public boolean isRotateRandom() {
+    return rotateRandom;
+  }
+
+  /**
+   * @param rotateRandom determines if the pieces will rotate by random angle or
+   * by 360 degrees.
+   */
+  public void setRotateRandom(boolean rotateRandom) {
+    this.rotateRandom = rotateRandom;
+  }
+
+  private FadeTransition setupFadeTransition(Node piece) {
+    FadeTransition ft = new FadeTransition();
+    ft.setNode(piece);
+    ft.setDuration(duration);
+    ft.setInterpolator(Interpolator.LINEAR);
+    ft.setFromValue(1);
+    ft.setToValue(0);
+    return ft;
+  }
+  
+  private RotateTransition setupRotateTransition(Node piece) {
+    RotateTransition rt = new RotateTransition();
+    rt.setNode(piece);
+    rt.setDuration(Duration.seconds(2));
+    rt.setInterpolator(Interpolator.LINEAR);
+
+    if (!isRotateRandom()) {
+      rt.setByAngle(360);
+      rt.setCycleCount(Timeline.INDEFINITE);
+    } else {
+      rt.setToAngle(Math.random() * 360);
+      rt.setCycleCount(1);
     }
-    
-    @Override
-    public void start(Stage primaryStage) {
-        primaryStage.setTitle("@javafxcz - Shatter - www.dredwerkz.cz");
-        final Group root = new Group();
-        Scene scene = new Scene(root, 800, 600);
-        primaryStage.setScene(scene);
+    return rt;
+  }
+  
+  private TranslateTransition setupTranslateTransition(Node piece) {
+    TranslateTransition tt = new TranslateTransition();
+    tt.setNode(piece);
+    tt.setDuration(Duration.seconds(3));
+    tt.setInterpolator(Interpolator.LINEAR);
+    return tt;
+  }
+  
+  private void shatterCircle(Node node) {
+    circle = (Circle) node;
+    getChildren().add(circle);
+
+    circle.setOnMouseClicked(e -> {
+
+      for (int i = 0; i < strength; i++) {
+        Arc piece = new Arc();
+        piece.setCenterX(circle.getCenterX());
+        piece.setCenterY(circle.getCenterY());
+        piece.setRadiusX(circle.getRadius());
+        piece.setRadiusY(circle.getRadius());
+        piece.setFill(circle.getFill());
+        piece.setStartAngle((360 / strength) * i);
+        piece.setLength(arcLength);
+        piece.setType(ArcType.ROUND);
+        pieces.getChildren().add(piece);
+        TranslateTransition pieceTranslation = setupTranslateTransition(pieces.getChildren().get(i));
         
-        final Circle circle = new Circle(50, Color.BLACK);
-        circle.setCenterX(scene.getWidth() / 2);
-        circle.setCenterY(scene.getHeight() / 2);
-        //final Color colors[] = {Color.BLACK, Color.RED, Color.GOLD};
-        final Group pieces =  new Group();
-        
-        circle.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override public void handle(MouseEvent me) {
-                for (int i = 0; i < STRENGTH; i++) {
-                    pieces.getChildren().add(ArcBuilder.create()
-                        .centerX(circle.getCenterX())
-                        .centerY(circle.getCenterY())
-                        .radiusX(circle.getRadius())
-                        .radiusY(circle.getRadius())
-                        .startAngle((360 / STRENGTH) * i).length(arcLength)
-                        //.fill(colors[i])
-                        .type(ArcType.ROUND)
-                        .build());
-                    circle.setOpacity(0);
-                }
-                
-                root.getChildren().add(pieces);
-                
-                TranslateTransition tArc0 = TranslateTransitionBuilder.create()
-                    .toX(circle.getCenterX() + Math.sin(arcLength / 2) * pieces.getChildren().get(0).getBoundsInLocal().getMaxY())
-                    .toY(-pieces.getChildren().get(0).getBoundsInLocal().getMaxY())
-                    .node(pieces.getChildren().get(0))
-                    .duration(Duration.seconds(3)).interpolator(Interpolator.LINEAR)
-                    .build();
-                RotateTransition rotArc0 = RotateTransitionBuilder.create()
-                    .byAngle(360)//.toAngle(Math.random() * 360)
-                    .node(pieces.getChildren().get(0))
-                    .duration(Duration.seconds(2)).cycleCount(Timeline.INDEFINITE).interpolator(Interpolator.LINEAR)
-                    .build();
-                
-                TranslateTransition tArc1 = TranslateTransitionBuilder.create()
-                    .toX(-circle.getCenterX() + Math.sin(arcLength / 2) * pieces.getChildren().get(1).getBoundsInLocal().getMaxY())
-                    .toY(-pieces.getChildren().get(1).getBoundsInLocal().getMaxY())
-                    .node(pieces.getChildren().get(1))
-                    .duration(Duration.seconds(3)).interpolator(Interpolator.LINEAR)
-                    .build();
-                 RotateTransition rotArc1 = RotateTransitionBuilder.create()
-                    .byAngle(360)//.toAngle(Math.random() * 360)
-                    .node(pieces.getChildren().get(1))
-                    .duration(Duration.seconds(2)).cycleCount(Timeline.INDEFINITE).interpolator(Interpolator.LINEAR)
-                    .build();
-                                
-                TranslateTransition tArc2 =  TranslateTransitionBuilder.create()
-                    .toX(circle.getCenterX() + Math.sin(arcLength / 2) * pieces.getChildren().get(2).getBoundsInLocal().getMaxY())
-                    .toY(pieces.getChildren().get(2).getBoundsInLocal().getMaxY())
-                    .node(pieces.getChildren().get(2))
-                    .duration(Duration.seconds(3)).interpolator(Interpolator.LINEAR)
-                    .build();
-                RotateTransition rotArc2 = RotateTransitionBuilder.create()
-                    .byAngle(360)//.toAngle(Math.random() * 360)
-                    .node(pieces.getChildren().get(2))
-                    .duration(Duration.seconds(2)).cycleCount(Timeline.INDEFINITE).interpolator(Interpolator.LINEAR)
-                    .build();
-                
-                ParallelTransition pArcs = ParallelTransitionBuilder.create()
-                    .children(tArc0, rotArc0, tArc1, rotArc1, tArc2, rotArc2)
-                    .build();
-                pArcs.play();
-            }
-        });
-        
-        root.getChildren().add(circle);
-        primaryStage.show();
-    }
+        if (i + 1 <= strength * .25) {
+          System.out.println("i <= strength * .25: " + i + ", " + strength * .25);
+          pieceTranslation.setToX(circle.getCenterX() + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(-pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        } else if (i + 1 <= strength * .5) {
+          System.out.println("i <= strength * .5: " + i + ", " + strength * .5);
+          pieceTranslation.setToX(-circle.getCenterX() + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(-pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        } else if (i + 1 <= strength * .75) {
+          System.out.println("i <= strength * .75: " + i + ", " + strength * .75);
+          pieceTranslation.setToX(circle.getCenterX() + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        } else if (i + 1 > strength * .75) {
+          System.out.println("i > strength * .75: " + i + ", " + strength * .75);
+          pieceTranslation.setToX(-circle.getCenterX() + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        }
+
+        RotateTransition pieceRotation = setupRotateTransition(pieces.getChildren().get(i));
+        FadeTransition pieceFadeOut = setupFadeTransition(pieces.getChildren().get(i));
+        par.getChildren().addAll(pieceTranslation, pieceRotation, pieceFadeOut);
+      }
+
+      getChildren().removeAll(circle);
+      par.play();
+    });
+
+    getChildren().add(pieces);
+  }
+  
+  private void shatterEllipse(Node node) {
+    ellipse = (Ellipse) node;
+    getChildren().add(ellipse);
+  }
+  
+  private void shatterImageView(Node node) {
+    imageView = (ImageView) node;
+    getChildren().add(imageView);
+    SnapshotParameters sp = new SnapshotParameters();
+    sp.setFill(Color.TRANSPARENT);
+
+    /*System.out.println("x: "+ imageView.getX());
+     System.out.println("y: "+ imageView.getY());
+     System.out.println("width: "+ imageView.getImage().getWidth());
+     System.out.println("height: "+ imageView.getImage().getHeight());*/
+    imageView.setOnMouseClicked(e -> {
+
+      for (int i = 0; i < strength; i++) {;
+        Arc piece = new Arc();
+        piece.setCenterX(imageView.getX() + imageView.getImage().getWidth() / 2);
+        piece.setCenterY(imageView.getY() + imageView.getImage().getHeight() / 2);
+        piece.setRadiusX(Math.max(imageView.getImage().getWidth(), imageView.getImage().getHeight()));
+        piece.setRadiusY(Math.max(imageView.getImage().getWidth(), imageView.getImage().getHeight()));
+        piece.setStartAngle((360 / strength) * i);
+        piece.setLength(arcLength);
+        piece.setType(ArcType.ROUND);
+        imageView.setClip(piece);
+        WritableImage wimg = imageView.snapshot(sp, null);
+        ImageView pieceImageView = new ImageView(wimg);
+        pieceImageView.setX(imageView.getX());
+        pieceImageView.setY(imageView.getY());
+        pieces.getChildren().add(pieceImageView);
+        TranslateTransition pieceTranslation = setupTranslateTransition(pieces.getChildren().get(i));
+
+        if (i + 1 <= strength * .25) {
+          System.out.println("i <= strength * .25: " + i + ", " + strength * .25);
+          pieceTranslation.setToX(imageView.getImage().getWidth() / 2 + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());//pieces.getChildren().get(i)
+          pieceTranslation.setToY(-pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        } else if (i + 1 <= strength * .5) {
+          System.out.println("i <= strength * .5: " + i + ", " + strength * .5);
+          pieceTranslation.setToX(-imageView.getImage().getWidth() / 2 + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(-pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        } else if (i + 1 <= strength * .75) {
+          System.out.println("i <= strength * .75: " + i + ", " + strength * .75);
+          pieceTranslation.setToX(imageView.getImage().getWidth() / 2 + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        } else if (i + 1 > strength * .75) {
+          System.out.println("i > strength * .75: " + i + ", " + strength * .75);
+          pieceTranslation.setToX(-imageView.getImage().getWidth() / 2 + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        }
+
+        RotateTransition pieceRotation = setupRotateTransition(pieces.getChildren().get(i));
+        FadeTransition pieceFadeOut = setupFadeTransition(pieces.getChildren().get(i));
+        par.getChildren().addAll(pieceTranslation, pieceRotation, pieceFadeOut);
+      }
+
+      getChildren().removeAll(imageView);
+      par.play();
+    });
+
+    getChildren().add(pieces);
+  }
+  
+  private void shatterRectangle(Node node) {
+    rectangle = (Rectangle) node;
+    getChildren().add(rectangle);
+    rectangle.setOnMouseClicked(e -> {
+
+      for (int i = 0; i < strength; i++) {;
+        Arc piece = new Arc();
+        piece.setCenterX(rectangle.getX() + rectangle.getWidth() / 2);
+        piece.setCenterY(rectangle.getY() + rectangle.getHeight() / 2);
+        piece.setRadiusX(Math.max(rectangle.getWidth(), rectangle.getHeight()));
+        piece.setRadiusY(Math.max(rectangle.getWidth(), rectangle.getHeight()));
+        piece.setFill(rectangle.getFill());
+        piece.setStartAngle((360 / strength) * i);
+        piece.setLength(arcLength);
+        piece.setType(ArcType.ROUND);
+        Shape result = Shape.intersect(piece, rectangle);
+        pieces.getChildren().add(result);
+        TranslateTransition pieceTranslation = setupTranslateTransition(pieces.getChildren().get(i));
+
+        if (i + 1 <= strength * .25) {
+          System.out.println("i <= strength * .25: " + i + ", " + strength * .25);
+          pieceTranslation.setToX(rectangle.getWidth() / 2 + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(-pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        } else if (i + 1 <= strength * .5) {
+          System.out.println("i <= strength * .5: " + i + ", " + strength * .5);
+          pieceTranslation.setToX(-rectangle.getWidth() / 2 + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(-pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        } else if (i + 1 <= strength * .75) {
+          System.out.println("i <= strength * .75: " + i + ", " + strength * .75);
+          pieceTranslation.setToX(rectangle.getWidth() / 2 + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        } else if (i + 1 > strength * .75) {
+          System.out.println("i > strength * .75: " + i + ", " + strength * .75);
+          pieceTranslation.setToX(-rectangle.getWidth() / 2 + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+
+        }
+
+        FadeTransition pieceFadeOut = setupFadeTransition(pieces.getChildren().get(i));
+        RotateTransition pieceRotation = setupRotateTransition(pieces.getChildren().get(i));
+        par.getChildren().addAll(pieceTranslation, pieceRotation, pieceFadeOut);
+      }
+
+      getChildren().removeAll(rectangle);
+      par.play();
+    });
+
+    getChildren().add(pieces);
+  }
+  
+  private void shatterText(Node node) {
+    text = (Text) node;
+    getChildren().add(text);
+    text.setOnMouseClicked(e -> {
+
+      for (int i = 0; i < strength; i++) {;
+        Arc piece = new Arc();
+        piece.setCenterX(text.getX() + text.getLayoutBounds().getWidth() / 2);
+        piece.setCenterY(text.getY() + text.getLayoutBounds().getHeight() / 2);
+        piece.setRadiusX(Math.max(text.getLayoutBounds().getWidth(), text.getLayoutBounds().getHeight()));
+        piece.setRadiusY(Math.max(text.getLayoutBounds().getWidth(), text.getLayoutBounds().getHeight()));
+        piece.setFill(text.getFill());
+        piece.setStartAngle((360 / strength) * i);
+        piece.setLength(arcLength);
+        piece.setType(ArcType.ROUND);
+        Shape result = Shape.intersect(piece, text);
+        pieces.getChildren().add(result);
+        TranslateTransition pieceTranslation = setupTranslateTransition(pieces.getChildren().get(i));
+
+        if (i + 1 <= strength * .25) {
+          System.out.println("i <= strength * .25: " + i + ", " + strength * .25);
+          pieceTranslation.setToX(text.getLayoutBounds().getWidth() / 2 + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(-pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        } else if (i + 1 <= strength * .5) {
+          System.out.println("i <= strength * .5: " + i + ", " + strength * .5);
+          pieceTranslation.setToX(-text.getLayoutBounds().getWidth() / 2 + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(-pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        } else if (i + 1 <= strength * .75) {
+          System.out.println("i <= strength * .75: " + i + ", " + strength * .75);
+          pieceTranslation.setToX(text.getLayoutBounds().getWidth() / 2 + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        } else if (i + 1 > strength * .75) {
+          System.out.println("i > strength * .75: " + i + ", " + strength * .75);
+          pieceTranslation.setToX(-text.getLayoutBounds().getWidth() / 2 + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        }
+
+        FadeTransition pieceFadeOut = setupFadeTransition(pieces.getChildren().get(i));
+        RotateTransition pieceRotation = setupRotateTransition(pieces.getChildren().get(i));
+        par.getChildren().addAll(pieceTranslation, pieceRotation, pieceFadeOut);
+      }
+
+      getChildren().removeAll(text);
+      par.play();
+    });
+
+    getChildren().add(pieces);
+  }
 }
