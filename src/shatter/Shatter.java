@@ -28,7 +28,9 @@ import javafx.util.Duration;
  */
 public class Shatter extends Parent {
 
-  private Duration duration = Duration.seconds(3);
+  private Duration fadeOutDuration = Duration.seconds(3);
+  private Duration rotateDuration = Duration.seconds(3);
+  private Duration translateDuration = Duration.seconds(3);
   private double strength = 8;
   private final double arcLength = 360 / getStrength();
   private final ParallelTransition par = new ParallelTransition();
@@ -63,19 +65,35 @@ public class Shatter extends Parent {
   }
 
     /**
-   * @return the duration
+   * @return the fadeOutDuration
    */
-  public Duration getDuration() {
-    return duration;
+  public Duration getFadeOutDuration() {
+    return fadeOutDuration;
   }
 
   /**
-   * @param duration the duration to set
+   * @param fadeOutDuration the duration to set
+   * Default fade out duration is 3 seconds
    */
-  public void setDuration(Duration duration) {
-    this.duration = duration;
+  public void setFadeOutDuration(Duration fadeOutDuration) {
+    this.fadeOutDuration = fadeOutDuration;
   }
 
+    /**
+   * @return the rotateDuration
+   */
+  public Duration getRotateDuration() {
+    return rotateDuration;
+  }
+
+  /**
+   * @param rotateDuration the rotateDuration to set
+   * Default rotate duration is 3 seconds
+   */
+  public void setRotateDuration(Duration rotateDuration) {
+    this.rotateDuration = rotateDuration;
+  }
+  
   /**
    * @return the strength that determines how many pieces will the shatter
    * produce.
@@ -86,12 +104,29 @@ public class Shatter extends Parent {
 
   /**
    * @param strength set the strength that determines how many pieces will the
-   * shatter produce.
+   * shatter produce. 
+   * Default strength is 8
    */
   public void setStrength(double strength) {
     this.strength = strength;
   }
 
+   /**
+   * @return the translateDuration
+   */
+  public Duration getTranslateDuration() {
+    return translateDuration;
+  }
+  
+  /**
+   * 
+   * @param translateDuration set the how fast will the shatter fall apart
+   * Default translate duration is 3 seconds
+   */
+  public void setTranslateDuration(Duration translateDuration) {
+    this.translateDuration = translateDuration;
+  }
+  
   /**
    * @return the rotateRandom
    */
@@ -110,7 +145,7 @@ public class Shatter extends Parent {
   private FadeTransition setupFadeTransition(Node piece) {
     FadeTransition ft = new FadeTransition();
     ft.setNode(piece);
-    ft.setDuration(duration);
+    ft.setDuration(fadeOutDuration);
     ft.setInterpolator(Interpolator.LINEAR);
     ft.setFromValue(1);
     ft.setToValue(0);
@@ -120,7 +155,7 @@ public class Shatter extends Parent {
   private RotateTransition setupRotateTransition(Node piece) {
     RotateTransition rt = new RotateTransition();
     rt.setNode(piece);
-    rt.setDuration(Duration.seconds(2));
+    rt.setDuration(rotateDuration);
     rt.setInterpolator(Interpolator.LINEAR);
 
     if (!isRotateRandom()) {
@@ -136,7 +171,7 @@ public class Shatter extends Parent {
   private TranslateTransition setupTranslateTransition(Node piece) {
     TranslateTransition tt = new TranslateTransition();
     tt.setNode(piece);
-    tt.setDuration(Duration.seconds(3));
+    tt.setDuration(translateDuration);
     tt.setInterpolator(Interpolator.LINEAR);
     return tt;
   }

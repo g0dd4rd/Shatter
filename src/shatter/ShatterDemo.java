@@ -41,16 +41,18 @@ public class ShatterDemo extends Application {
     primaryStage.setScene(scene);
     Shatter circle = new Shatter(new Circle(100, 200, 50));
     circle.setStrength(12);
-    circle.setDuration(Duration.millis(500));
+    circle.setFadeOutDuration(Duration.millis(500));
     circle.setRotateRandom(false);
     
     Shatter rectangle = new Shatter(new Rectangle(300, 400, 100, 100));
+    rectangle.setRotateDuration(Duration.millis(1000));
     
     Image img = new Image("file:1001167_280184238793557_125115852_n.jpg", 300, 200, true, true);
     ImageView view = new ImageView(img);
     view.setX(250);
     view.setY(200);
     Shatter iv = new Shatter(view);
+    iv.setTranslateDuration(Duration.seconds(8));
     
     Text text = new Text(600, 500, "Shatter me!");
     text.setFont(new Font(20));
