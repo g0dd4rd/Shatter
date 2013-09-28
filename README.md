@@ -1,4 +1,5 @@
 ShatterNode
 ===========
 
-Shatter node written in JavaFX 2.x
+Shatter node written in JavaFX 8 Preview. Here's a demo:
+http://www.youtube.com/watch?v=Y7d1SR9_A3M
