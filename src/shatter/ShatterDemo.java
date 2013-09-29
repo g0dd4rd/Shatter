@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -58,7 +59,12 @@ public class ShatterDemo extends Application {
     text.setFont(new Font(20));
     Shatter textShatter = new Shatter(text);
     
-    root.getChildren().addAll(circle, iv, rectangle, textShatter);
+    Ellipse ellipse = new Ellipse();
+    ellipse.setCenterX(50);
+    ellipse.setCenterY(50);
+    ellipse.setRadiusX(50);
+    ellipse.setRadiusY(25);
+    root.getChildren().addAll(circle, iv, rectangle, textShatter, ellipse);
     primaryStage.show();
   }
 }

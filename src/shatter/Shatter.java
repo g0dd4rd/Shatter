@@ -31,6 +31,9 @@ public class Shatter extends Parent {
   private Duration fadeOutDuration = Duration.seconds(3);
   private Duration rotateDuration = Duration.seconds(3);
   private Duration translateDuration = Duration.seconds(3);
+  private Interpolator fadeOutInterpolator = Interpolator.LINEAR;
+  private Interpolator rotateInterpolator = Interpolator.LINEAR;
+  private Interpolator translateInterpolator = Interpolator.LINEAR;
   private double strength = 8;
   private final double arcLength = 360 / getStrength();
   private final ParallelTransition par = new ParallelTransition();
@@ -45,7 +48,8 @@ public class Shatter extends Parent {
   /**
    * Creates Shatter node with default behavior
    *
-   * @param node the node representing this shatter
+   * @param node the node representing this shatter - instance of
+   * Circle, Ellipse, ImageView, Rectangle or Text.
    */
   public Shatter(Node node) {
     
@@ -53,7 +57,7 @@ public class Shatter extends Parent {
       if (node.getClass().getName().equalsIgnoreCase("javafx.scene.shape.Circle")) {
         shatterCircle(node);
       } else if (node.getClass().getName().equalsIgnoreCase("javafx.scene.shape.Ellipse")) {
-        shatterEllipse(node);
+        shatterEllipse(node); // not implemented
       } else if (node.getClass().getName().equalsIgnoreCase("javafx.scene.image.ImageView")) {
         shatterImageView(node);
       } else if (node.getClass().getName().equalsIgnoreCase("javafx.scene.shape.Rectangle")) {
@@ -64,7 +68,7 @@ public class Shatter extends Parent {
     }
   }
 
-    /**
+  /**
    * @return the fadeOutDuration
    */
   public Duration getFadeOutDuration() {
@@ -79,7 +83,21 @@ public class Shatter extends Parent {
     this.fadeOutDuration = fadeOutDuration;
   }
 
-    /**
+  /**
+   * @return the fadeOutInterpolator
+   */
+  public Interpolator getFadeOutInterpolator() {
+    return fadeOutInterpolator;
+  }
+
+  /**
+   * @param fadeOutInterpolator the fadeOutInterpolator to set
+   */
+  public void setFadeOutInterpolator(Interpolator fadeOutInterpolator) {
+    this.fadeOutInterpolator = fadeOutInterpolator;
+  }
+  
+  /**
    * @return the rotateDuration
    */
   public Duration getRotateDuration() {
@@ -92,6 +110,20 @@ public class Shatter extends Parent {
    */
   public void setRotateDuration(Duration rotateDuration) {
     this.rotateDuration = rotateDuration;
+  }
+  
+  /**
+   * @return the rotateInterpolator
+   */
+  public Interpolator getRotateInterpolator() {
+    return rotateInterpolator;
+  }
+
+  /**
+   * @param rotateInterpolator the rotateInterpolator to set
+   */
+  public void setRotateInterpolator(Interpolator rotateInterpolator) {
+    this.rotateInterpolator = rotateInterpolator;
   }
   
   /**
@@ -111,7 +143,7 @@ public class Shatter extends Parent {
     this.strength = strength;
   }
 
-   /**
+  /**
    * @return the translateDuration
    */
   public Duration getTranslateDuration() {
@@ -125,6 +157,20 @@ public class Shatter extends Parent {
    */
   public void setTranslateDuration(Duration translateDuration) {
     this.translateDuration = translateDuration;
+  }
+  
+  /**
+   * @return the translateInterpolator
+   */
+  public Interpolator getTranslateInterpolator() {
+    return translateInterpolator;
+  }
+
+  /**
+   * @param translateInterpolator the translateInterpolator to set
+   */
+  public void setTranslateInterpolator(Interpolator translateInterpolator) {
+    this.translateInterpolator = translateInterpolator;
   }
   
   /**
@@ -146,7 +192,7 @@ public class Shatter extends Parent {
     FadeTransition ft = new FadeTransition();
     ft.setNode(piece);
     ft.setDuration(fadeOutDuration);
-    ft.setInterpolator(Interpolator.LINEAR);
+    ft.setInterpolator(fadeOutInterpolator);
     ft.setFromValue(1);
     ft.setToValue(0);
     return ft;
@@ -156,7 +202,7 @@ public class Shatter extends Parent {
     RotateTransition rt = new RotateTransition();
     rt.setNode(piece);
     rt.setDuration(rotateDuration);
-    rt.setInterpolator(Interpolator.LINEAR);
+    rt.setInterpolator(rotateInterpolator);
 
     if (!isRotateRandom()) {
       rt.setByAngle(360);
@@ -172,7 +218,7 @@ public class Shatter extends Parent {
     TranslateTransition tt = new TranslateTransition();
     tt.setNode(piece);
     tt.setDuration(translateDuration);
-    tt.setInterpolator(Interpolator.LINEAR);
+    tt.setInterpolator(translateInterpolator);
     return tt;
   }
   
