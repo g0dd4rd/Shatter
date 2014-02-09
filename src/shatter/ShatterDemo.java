@@ -1,16 +1,17 @@
 /*
  * TODO
- * - make it an actual node
  * - make it react on touch and collision
  * - improve the math
- * - create meaningful interface for good usability
- * 
+ * - create useful API
+ * - add sound?
+ * - fix bugs ;)
  */
 package shatter;
 
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;
@@ -40,10 +41,12 @@ public class ShatterDemo extends Application {
     final Group root = new Group();
     Scene scene = new Scene(root, 800, 600);
     primaryStage.setScene(scene);
+    
     Shatter circle = new Shatter(new Circle(100, 200, 50));
     circle.setStrength(12);
     circle.setFadeOutDuration(Duration.millis(500));
     circle.setRotateRandom(false);
+    Shatter c = new Shatter(new Circle(600, 500, 50));
     
     Shatter rectangle = new Shatter(new Rectangle(300, 400, 100, 100));
     rectangle.setRotateDuration(Duration.millis(1000));
@@ -64,7 +67,11 @@ public class ShatterDemo extends Application {
     ellipse.setCenterY(50);
     ellipse.setRadiusX(50);
     ellipse.setRadiusY(25);
-    root.getChildren().addAll(circle, iv, rectangle, textShatter, ellipse);
+    Shatter e = new Shatter(ellipse);
+    
+    Shatter button = new Shatter(new Button("Meh"));
+    
+    root.getChildren().addAll(circle, c, iv, rectangle, textShatter, e, button);
     primaryStage.show();
   }
 }

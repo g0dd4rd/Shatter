@@ -44,26 +44,33 @@ public class Shatter extends Parent {
   private Rectangle rectangle;
   private Text text;
   private ImageView imageView;
+  private String CIRCLE = "javafx.scene.shape.Circle";
+  private String ELLIPSE = "javafx.scene.shape.Ellipse";
+  private String IMAGE = "javafx.scene.image.ImageView";
+  private String RECTANGLE = "javafx.scene.shape.Rectangle";
+  private String TEXT = "javafx.scene.text.Text";
 
   /**
    * Creates Shatter node with default behavior
    *
-   * @param node the node representing this shatter - instance of
-   * Circle, Ellipse, ImageView, Rectangle or Text.
+   * @param node the node representing this shatter - instance of Circle,
+   * Ellipse, ImageView, Rectangle or Text.
    */
   public Shatter(Node node) {
-    
+
     if (node != null) {
-      if (node.getClass().getName().equalsIgnoreCase("javafx.scene.shape.Circle")) {
+      if (node.getClass().getName().equalsIgnoreCase(CIRCLE)) {
         shatterCircle(node);
-      } else if (node.getClass().getName().equalsIgnoreCase("javafx.scene.shape.Ellipse")) {
-        shatterEllipse(node); // not implemented
-      } else if (node.getClass().getName().equalsIgnoreCase("javafx.scene.image.ImageView")) {
+      } else if (node.getClass().getName().equalsIgnoreCase(ELLIPSE)) {
+        shatterEllipse(node); 
+      } else if (node.getClass().getName().equalsIgnoreCase(IMAGE)) {
         shatterImageView(node);
-      } else if (node.getClass().getName().equalsIgnoreCase("javafx.scene.shape.Rectangle")) {
+      } else if (node.getClass().getName().equalsIgnoreCase(RECTANGLE)) {
         shatterRectangle(node);
-      } else if (node.getClass().getName().equalsIgnoreCase("javafx.scene.text.Text")) {
+      } else if (node.getClass().getName().equalsIgnoreCase(TEXT)) {
         shatterText(node);
+      } else {
+        System.err.println(node.getClass().getName() + " is not supported.");
       }
     }
   }
@@ -76,8 +83,8 @@ public class Shatter extends Parent {
   }
 
   /**
-   * @param fadeOutDuration the duration to set
-   * Default fade out duration is 3 seconds
+   * @param fadeOutDuration the duration to set Default fade out duration is 3
+   * seconds
    */
   public void setFadeOutDuration(Duration fadeOutDuration) {
     this.fadeOutDuration = fadeOutDuration;
@@ -96,7 +103,7 @@ public class Shatter extends Parent {
   public void setFadeOutInterpolator(Interpolator fadeOutInterpolator) {
     this.fadeOutInterpolator = fadeOutInterpolator;
   }
-  
+
   /**
    * @return the rotateDuration
    */
@@ -105,13 +112,13 @@ public class Shatter extends Parent {
   }
 
   /**
-   * @param rotateDuration the rotateDuration to set
-   * Default rotate duration is 3 seconds
+   * @param rotateDuration the rotateDuration to set Default rotate duration is
+   * 3 seconds
    */
   public void setRotateDuration(Duration rotateDuration) {
     this.rotateDuration = rotateDuration;
   }
-  
+
   /**
    * @return the rotateInterpolator
    */
@@ -125,7 +132,7 @@ public class Shatter extends Parent {
   public void setRotateInterpolator(Interpolator rotateInterpolator) {
     this.rotateInterpolator = rotateInterpolator;
   }
-  
+
   /**
    * @return the strength that determines how many pieces will the shatter
    * produce.
@@ -136,8 +143,7 @@ public class Shatter extends Parent {
 
   /**
    * @param strength set the strength that determines how many pieces will the
-   * shatter produce. 
-   * Default strength is 8
+   * shatter produce. Default strength is 8
    */
   public void setStrength(double strength) {
     this.strength = strength;
@@ -149,16 +155,16 @@ public class Shatter extends Parent {
   public Duration getTranslateDuration() {
     return translateDuration;
   }
-  
+
   /**
-   * 
+   *
    * @param translateDuration set the how fast will the shatter fall apart
    * Default translate duration is 3 seconds
    */
   public void setTranslateDuration(Duration translateDuration) {
     this.translateDuration = translateDuration;
   }
-  
+
   /**
    * @return the translateInterpolator
    */
@@ -172,7 +178,7 @@ public class Shatter extends Parent {
   public void setTranslateInterpolator(Interpolator translateInterpolator) {
     this.translateInterpolator = translateInterpolator;
   }
-  
+
   /**
    * @return the rotateRandom
    */
@@ -197,7 +203,7 @@ public class Shatter extends Parent {
     ft.setToValue(0);
     return ft;
   }
-  
+
   private RotateTransition setupRotateTransition(Node piece) {
     RotateTransition rt = new RotateTransition();
     rt.setNode(piece);
@@ -213,7 +219,7 @@ public class Shatter extends Parent {
     }
     return rt;
   }
-  
+
   private TranslateTransition setupTranslateTransition(Node piece) {
     TranslateTransition tt = new TranslateTransition();
     tt.setNode(piece);
@@ -221,7 +227,7 @@ public class Shatter extends Parent {
     tt.setInterpolator(translateInterpolator);
     return tt;
   }
-  
+
   private void shatterCircle(Node node) {
     circle = (Circle) node;
     getChildren().add(circle);
@@ -240,7 +246,7 @@ public class Shatter extends Parent {
         piece.setType(ArcType.ROUND);
         pieces.getChildren().add(piece);
         TranslateTransition pieceTranslation = setupTranslateTransition(pieces.getChildren().get(i));
-        
+
         if (i + 1 <= strength * .25) {
           System.out.println("i <= strength * .25: " + i + ", " + strength * .25);
           pieceTranslation.setToX(circle.getCenterX() + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
@@ -270,12 +276,55 @@ public class Shatter extends Parent {
 
     getChildren().add(pieces);
   }
-  
+
   private void shatterEllipse(Node node) {
     ellipse = (Ellipse) node;
     getChildren().add(ellipse);
+    ellipse.setOnMouseClicked(e -> {
+
+      for (int i = 0; i < strength; i++) {
+        Arc piece = new Arc();
+        piece.setCenterX(ellipse.getCenterX());
+        piece.setCenterY(ellipse.getCenterY());
+        piece.setRadiusX(ellipse.getRadiusX());
+        piece.setRadiusY(ellipse.getRadiusY());
+        piece.setFill(ellipse.getFill());
+        piece.setStartAngle((360 / strength) * i);
+        piece.setLength(arcLength);
+        piece.setType(ArcType.ROUND);
+        pieces.getChildren().add(piece);
+        TranslateTransition pieceTranslation = setupTranslateTransition(pieces.getChildren().get(i));
+
+        if (i + 1 <= strength * .25) {
+          System.out.println("i <= strength * .25: " + i + ", " + strength * .25);
+          pieceTranslation.setToX(ellipse.getCenterX() + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(-pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        } else if (i + 1 <= strength * .5) {
+          System.out.println("i <= strength * .5: " + i + ", " + strength * .5);
+          pieceTranslation.setToX(-ellipse.getCenterX() + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(-pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        } else if (i + 1 <= strength * .75) {
+          System.out.println("i <= strength * .75: " + i + ", " + strength * .75);
+          pieceTranslation.setToX(ellipse.getCenterX() + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        } else if (i + 1 > strength * .75) {
+          System.out.println("i > strength * .75: " + i + ", " + strength * .75);
+          pieceTranslation.setToX(-ellipse.getCenterX() + Math.sin((360 / strength) * i + (arcLength / 2)) * pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+          pieceTranslation.setToY(pieces.getChildren().get(i).getBoundsInLocal().getMaxY());
+        }
+
+        RotateTransition pieceRotation = setupRotateTransition(pieces.getChildren().get(i));
+        FadeTransition pieceFadeOut = setupFadeTransition(pieces.getChildren().get(i));
+        par.getChildren().addAll(pieceTranslation, pieceRotation, pieceFadeOut);
+      }
+
+      getChildren().removeAll(ellipse);
+      par.play();
+    });
+
+    getChildren().add(pieces);
   }
-  
+
   private void shatterImageView(Node node) {
     imageView = (ImageView) node;
     getChildren().add(imageView);
@@ -334,7 +383,7 @@ public class Shatter extends Parent {
 
     getChildren().add(pieces);
   }
-  
+
   private void shatterRectangle(Node node) {
     rectangle = (Rectangle) node;
     getChildren().add(rectangle);
@@ -384,7 +433,7 @@ public class Shatter extends Parent {
 
     getChildren().add(pieces);
   }
-  
+
   private void shatterText(Node node) {
     text = (Text) node;
     getChildren().add(text);
