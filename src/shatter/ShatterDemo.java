@@ -8,6 +8,8 @@
  */
 package shatter;
 
+import javafx.animation.Timeline;
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -68,6 +70,17 @@ public class ShatterDemo extends Application {
     ellipse.setRadiusX(50);
     ellipse.setRadiusY(25);
     Shatter e = new Shatter(ellipse);
+    
+    TranslateTransition tt = new TranslateTransition();
+    tt.setNode(e);
+    tt.setFromX(0);
+    tt.setFromY(100);
+    tt.setToX(200);
+    tt.setToY(100);
+    tt.setDuration(Duration.seconds(3));
+    tt.setAutoReverse(true);
+    tt.setCycleCount(Timeline.INDEFINITE);
+    tt.play();
     
     Shatter button = new Shatter(new Button("Meh"));
     
